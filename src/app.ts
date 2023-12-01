@@ -1,7 +1,6 @@
 import express from 'express';
 import todosController from './controllers/todosController'
 import { dbDataSource } from "../app-data-source"
-import { Request, Response } from "express"
 import { Item } from './entity/item.entity'
 import session from 'express-session'
 
