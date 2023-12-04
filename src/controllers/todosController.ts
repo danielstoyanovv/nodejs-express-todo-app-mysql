@@ -8,7 +8,11 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 export default function (app: any, dbDataSource: any) {
     app.get('/todo', async function (req: Request, res: Response) {
-        const  items = await dbDataSource.getRepository(Item).find()
+        const  items = await dbDataSource.getRepository(Item).find({
+            order: {
+                id: "DESC"
+            }
+        })
         if (req.session.errors) {
             const errors = req.session.errors;
             req.session.errors = [];
