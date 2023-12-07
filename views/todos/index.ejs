@@ -1,0 +1,24 @@
+<%- include('../partials/header.ejs') %>
+<div class="container">
+    <div class="row">
+        <h1>Company Todo list</h1>
+        <div id='todo-table'>
+            <%- include('../partials/alerts.ejs', {errors: errors}) %>
+            <%- include('../partials/form/create.ejs') %>
+            <ul class="list-group">
+                <% for(var i=0; i < todos.length; i++) { %>
+                    <li class="list-group-item">
+                        <div class="float-start"><%= todos[i].task %></div>
+                        <div class="float-end">
+                            <i class="bi bi-trash f-right remove-button" data-id="<%= todos[i].id %>"></i>
+                            <a href="/todos/<%= todos[i].id %>">
+                                <i class="bi bi-file-earmark-code" data-id="<%= todos[i].id %>"></i>
+                            </a>
+                        </div>
+                    </li>
+                <% } %>
+            </ul>
+        </div>
+    </div>
+</div>
+<%- include('../partials/footer.ejs') %>

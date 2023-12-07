@@ -1,0 +1,12 @@
+<%- include('../partials/header.ejs') %>
+<div class="container">
+    <div class="row">
+        <h1>Company Todo Update</h1>
+        <div id='todo-table'>
+            <%- include('../partials/alerts.ejs', {errors: errors}) %>
+            <%- include('../partials/form/update.ejs', {item: item}) %>
+        </div>
+        <a href="/todos">Back</a>
+    </div>
+</div>
+<%- include('../partials/footer.ejs') %>

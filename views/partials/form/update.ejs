@@ -1,0 +1,8 @@
+<form method="POST" action="/todos/<%= item.id %>">
+    <div class="form-group">
+        <input class="form-control" type="text" name="task" value="<%= item.task %>" required />
+        <input class="form-control" type="text" name="email" value="<%= item.email %>" required />
+        <input class="form-control" type="text" name="phone" value="<%= item.phone %>" required />
+    </div>
+    <button class="form-control" type="submit">Update Task</button>
+</form>
