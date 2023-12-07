@@ -3,7 +3,10 @@
     <div class="row">
         <h1>Company Todo list</h1>
         <div id='todo-table'>
-            <%- include('../partials/alerts.ejs', {errors: errors}) %>
+            <% if(typeof errors !== 'undefined'){ %>
+                <%- include('../partials/alerts.ejs', {errors: errors}) %>
+            <% } %>
+
             <%- include('../partials/form/create.ejs') %>
             <ul class="list-group">
                 <% for(var i=0; i < todos.length; i++) { %>
