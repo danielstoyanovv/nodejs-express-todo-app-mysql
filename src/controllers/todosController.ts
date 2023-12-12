@@ -54,9 +54,10 @@ export default function (app: any, dbDataSource: any) {
     });
 
     app.get("/todos/:id", async function (req: Request, res: Response) {
+        const { id } = req.params
         dbDataSource.getRepository(Item).findOne({
             where: {
-                id: req.params.id
+                id: id
             }
         }).then(function (result: object) {
             if (req.session.errors) {
@@ -84,7 +85,7 @@ export default function (app: any, dbDataSource: any) {
             .isNumeric().withMessage('Phone should be only digits')
     ],  async function (req: Request, res: Response) {
         try {
-            const id = req.params.id
+            const { id } = req.params
             let errors = validationResult(req)
             if (!errors.isEmpty()) {
                 req.session.errors = errors.array()
@@ -106,7 +107,8 @@ export default function (app: any, dbDataSource: any) {
 
     app.delete("/todos/:id", async function (req: Request, res: Response) {
         try {
-            const results = await dbDataSource.getRepository(Item).delete(req.params.id)
+            const { id } = req.params
+            const results = await dbDataSource.getRepository(Item).delete(id)
             return res.json(results)
         } catch (err) {
             console.log(err)
