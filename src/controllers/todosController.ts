@@ -1,7 +1,8 @@
 import { Item } from '../entity/item.entity'
 import bodyParser  from 'body-parser'
 import { Request, Response } from "express"
-import { check, validationResult } from 'express-validator';
+import {ItemFactory} from "../factories/ItemFactory"
+import { validate } from "class-validator"
 
 var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
@@ -30,25 +31,16 @@ export default function (app: any, dbDataSource: any) {
         });
     });
 
-    app.post('/todos', [urlencodedParser,
-        check('task', 'Task length is between 5 and 20 characters')
-            .isLength({ min: 5,  max: 20 }),
-        check('email', 'Email is not valid').isEmail(),
-        check('phone', 'Phone length is between 10 and 20 digits').isLength({ min: 10,  max: 20 })
-            .isNumeric().withMessage('Phone should be only digits')
-    ],  async function (req: Request, res: Response) {
+    app.post('/todos', [urlencodedParser],  async function (req: Request, res: Response) {
         try {
-            let errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                req.session.errors = errors.array()
-                return res.redirect('/todos')
+            const data = await getValidatedItemOrErrors(req, res)
+            if (data instanceof Item) {
+                await dbDataSource.getRepository(Item).save(data)
             }
-            const itemObject = await dbDataSource.getRepository(Item).create(req.body)
-            const item = await dbDataSource.getRepository(Item).save(itemObject)
             return res.redirect('/todos')
         } catch (err) {
             console.log(err)
-            req.session.errors = [{msg: "Somehting happened, or email is duplicated"}]
+            req.session.errors = ["Somehting happened, or email is duplicated"]
             return res.redirect('/todos')
         }
     });
@@ -77,30 +69,22 @@ export default function (app: any, dbDataSource: any) {
         })
     })
 
-    app.post('/todos/:id', [urlencodedParser,
-        check('task', 'Task length is between 5 and 20 characters')
-            .isLength({ min: 5,  max: 20 }),
-        check('email', 'Email is not valid').isEmail(),
-        check('phone', 'Phone length is between 10 and 20 digits').isLength({ min: 10,  max: 20 })
-            .isNumeric().withMessage('Phone should be only digits')
-    ],  async function (req: Request, res: Response) {
+    app.post('/todos/:id', [urlencodedParser],  async function (req: Request, res: Response) {
         try {
             const { id } = req.params
-            let errors = validationResult(req)
-            if (!errors.isEmpty()) {
-                req.session.errors = errors.array()
-                return res.redirect('/todos/' + id)
+            const data = await getValidatedItemOrErrors(req, res)
+            if (data instanceof Item) {
+                await dbDataSource
+                    .createQueryBuilder()
+                    .update(Item)
+                    .set(req.body)
+                    .where("id = :id", { id: id })
+                    .execute()
             }
-            await dbDataSource
-                .createQueryBuilder()
-                .update(Item)
-                .set(req.body)
-                .where("id = :id", { id: id })
-                .execute()
             return res.redirect('/todos/' + id)
         } catch (err) {
             console.log(err)
-            req.session.errors = [{msg: "Somehting happened, or email is duplicated"}]
+            req.session.errors = ["Somehting happened, or email is duplicated"]
             return res.redirect('/todos/' + req.params.id)
         }
     });
@@ -114,4 +98,26 @@ export default function (app: any, dbDataSource: any) {
             console.log(err)
         }
     })
+
+    async function getValidatedItemOrErrors(req: Request, res: Response) {
+        const item = ItemFactory.new()
+        const {task, email, phone} = req.body
+        item.task = task
+        item.email = email
+        item.phone = phone
+        const errors = await validate(item)
+        if (errors.length > 0) {
+            const messages: any = []
+            errors.forEach(error => {
+                if (error.constraints) {
+                    messages.push(Object.values(error.constraints))
+                }
+            })
+            if (messages.length > 0) {
+                req.session.errors = messages
+                return messages
+            }
+        }
+        return item
+    }
 }
