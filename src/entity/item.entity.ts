@@ -17,7 +17,7 @@ export class Item {
     @Length(10, 20)
     phone: string
 
-    @Column({ type: 'varchar', length: 50, nullable: false })
+    @Column({ type: 'varchar', nullable: false })
     @Length(5, 30)
     task: string
 }
